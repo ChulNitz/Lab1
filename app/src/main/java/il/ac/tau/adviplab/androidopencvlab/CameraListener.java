@@ -1,7 +1,12 @@
 package il.ac.tau.adviplab.androidopencvlab;
 
+import android.graphics.Bitmap;
+
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
     // Constants:
@@ -13,6 +18,8 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     static final int VIEW_MODE_HIST_EQUALIZE        = 5;
 
+    static final int VIEW_MODE_HIST_MATCH           = 6;
+
 
 
     //Mode selectors:
@@ -21,12 +28,16 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
     private boolean mShowHistogram = false;
     private boolean mShowCumulativeHistogram = false;
 
+    private boolean mShowMatchedHistogram = false;
+
     private boolean mShowEqualizedHistogram = false;
 
     //Members
     private Mat mImToProcess;
     private Mat[] mHistArray;
     private Mat[] mCumuHistArray;
+    private Mat mImageToMatch;
+    private Mat[] mHistDstArray;
 
     //Getters and setters
 
@@ -60,6 +71,10 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
         return mShowCumulativeHistogram;
     }
 
+    boolean isShowMatchedHistogram() {
+        return mShowMatchedHistogram;
+    }
+
     boolean isShowEqualizedHistogram() {
         return mShowEqualizedHistogram;
     }
@@ -87,6 +102,14 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
         for (Mat histMat : mCumuHistArray) {
             histMat.release();
         }
+        if (mHistDstArray != null) {
+            for (Mat mat : mHistDstArray) {
+                mat.release();
+            }
+        }
+        if (mImageToMatch != null) {
+            mImageToMatch.release();
+        }
     }
 
     @Override
@@ -104,22 +127,56 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
         switch (mViewMode) {
             case VIEW_MODE_DEFAULT:
                 break;
+            case VIEW_MODE_HIST_EQUALIZE:
+                if (mShowEqualizedHistogram) {
+                    MyImageProc.equalizeHist(mImToProcess);
+                }
+                break;
+            case VIEW_MODE_SHOW_HIST:
+                if (mShowHistogram) {
+                    int histSizeNum = 100;
+                    MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
+                    MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
+                }
+                break;
+                case VIEW_MODE_SHOW_CUMUHIST:
+                    if (mShowCumulativeHistogram) {
+                        int histSizeNum = 100;
+                        int numberOfChannels = Math.min(mImToProcess.channels(),3);
+                        MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
+                        MyImageProc.calcCumulativeHist(mHistArray, mCumuHistArray, numberOfChannels);
+                        MyImageProc.showHist(mImToProcess, mCumuHistArray, histSizeNum);
+                    }
+                    break;
+                case VIEW_MODE_HIST_MATCH:
+                    if (mHistDstArray == null) {
+                        break;
+                    }
+                    if (mHistDstArray[0].total() > 0) { //This handles the case that an image hasn’t been chosen
+                        MyImageProc.matchHist(mImToProcess, mImageToMatch,
+                                mHistArray, mHistDstArray, true);
+                    }
+                     break;
         }
-        if (mShowEqualizedHistogram) {
-            MyImageProc.equalizeHist(mImToProcess);
-        }
-        if (mShowHistogram) {
-            int histSizeNum = 100;
-            MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-            MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
-        }
-        if (mShowCumulativeHistogram) {
-            int histSizeNum = 100;
-            int numberOfChannels = Math.min(mImToProcess.channels(),3);
-            MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-            MyImageProc.calcCumulativeHist(mHistArray, mCumuHistArray, numberOfChannels);
-            MyImageProc.showHist(mImToProcess, mCumuHistArray, histSizeNum);
-        }
+
         return mImToProcess;
     }
+
+    void computeHistOfImageToMatch(Bitmap image) {
+        //converts a bitmap to Mat
+        mImageToMatch = new Mat();
+        Utils.bitmapToMat(image, mImageToMatch);
+        //convert to grayscale
+        Imgproc.cvtColor(mImageToMatch, mImageToMatch,
+                Imgproc.COLOR_RGBA2GRAY);
+        if (mHistDstArray == null) {
+            mHistDstArray = new Mat[3];
+            for (int i = 0; i < mHistDstArray.length; i++) {
+                mHistDstArray[i] = new Mat();
+            }
+        }
+        MyImageProc.calcHist(mImageToMatch, mHistDstArray, 256,
+                MyImageProc.HIST_NORMALIZATION_CONST, Core.NORM_L1);
+    }
+
 }

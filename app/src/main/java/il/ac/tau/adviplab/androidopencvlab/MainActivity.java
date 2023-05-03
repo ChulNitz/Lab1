@@ -3,9 +3,15 @@ package il.ac.tau.adviplab.androidopencvlab;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +32,8 @@ import java.util.Date;
 @SuppressWarnings("deprecation")
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    //Intent tags
+    private static final int SELECT_PICTURE = 1;
 
     //menu members
     private SubMenu mResolutionMenu;
@@ -39,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem mShowCumuHistMenuItem;
 
     private MenuItem mShowEqualizedHistMenuItem;
-
 
     // menu IDs
     private static final int RESOLUTION_GROUP_ID     = 1;
@@ -88,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             String fileName = Environment.getExternalStorageDirectory().getPath() +
                     "/sample_picture_" + currentDateandTime + ".jpg";
             mOpenCvCameraView.takePicture(fileName);
+            addImageToGallery(fileName, MainActivity.this);
             Toast.makeText(MainActivity.this, fileName + " saved",
                     Toast.LENGTH_SHORT).show();
         });
@@ -143,6 +151,10 @@ public class MainActivity extends AppCompatActivity {
                 CameraListener.VIEW_MODE_HIST_EQUALIZE, Menu.NONE, "Equalize")
                 .setCheckable(true)
                 .setChecked(mCameraListener.isShowCumulativeHistogram());
+        histogramMenu.add(HISTOGRAM_GROUP_ID,
+                CameraListener.VIEW_MODE_HIST_MATCH, Menu.NONE, "Match")
+                .setCheckable(true)
+                .setChecked(mCameraListener.isShowMatchedHistogram());
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
         // Store the menu items for histogram and cumulative histogram
@@ -227,6 +239,23 @@ public class MainActivity extends AppCompatActivity {
                         mCameraListener.setViewMode(CameraListener.VIEW_MODE_HIST_EQUALIZE);
                         mCameraListener.setShowEqualizedHistogram(item.isChecked());
                         break;
+                    case CameraListener.VIEW_MODE_HIST_MATCH:
+
+                        // if the image is not grayscale: show a toast and return
+                        if (mCameraListener.getColorMode() != CameraListener.VIEW_MODE_GRAYSCALE) {
+                            Toast.makeText(this, "This feature currently works only in grayscale mode",
+                                    Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                        //Open gallery to select image for matching
+                        Intent intent = new Intent();
+                        intent.setType("image/*");
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        startActivityForResult(Intent.createChooser(intent,
+                                        "Select image for histogram matching"),
+                                SELECT_PICTURE);
+                        mCameraListener.setViewMode(id);
+                        break;
                 }
                 return true;
 
@@ -234,6 +263,30 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent
+            data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_PICTURE) {
+            if (resultCode == RESULT_OK) {
+                Uri imageUri = data.getData();
+                if (imageUri != null) {
+                    {
+                        try {
+                            Bitmap imageToMatch =
+                                    MediaStore.Images.Media.getBitmap
+                                            (getContentResolver(), imageUri);
+                            mCameraListener.computeHistOfImageToMatch(imageToMatch);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     public void setResolutionMenu(SubMenu resMenu) {
         resMenu.clear();
@@ -247,6 +300,18 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < Math.min(mOpenCvCameraView.getNumberOfCameras(), 2); i++) {
             camMenu.add(CAMERA_GROUP_ID, i, Menu.NONE, mCameraNames[i]);
         }
+    }
+
+    @SuppressLint("InlinedApi")
+    private static void addImageToGallery(final String filePath, final
+    Context context) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.DATE_TAKEN,
+                System.currentTimeMillis());
+        values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.MediaColumns.DATA, filePath);
+        context.getContentResolver().
+                insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 }
 
