@@ -34,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
     //flags
     private Boolean mSettingsMenuAvailable = false;
 
+    private MenuItem mShowHistMenuItem;
+
+    private MenuItem mShowCumuHistMenuItem;
+
+
     // menu IDs
     private static final int RESOLUTION_GROUP_ID     = 1;
     private static final int CAMERA_GROUP_ID         = 2;
@@ -132,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
                 CameraListener.VIEW_MODE_SHOW_CUMUHIST, Menu.NONE, "Show cumulative histogram")
                 .setCheckable(true)
                 .setChecked(mCameraListener.isShowCumulativeHistogram());
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        // Store the menu items for histogram and cumulative histogram
+        mShowHistMenuItem = menu.findItem(CameraListener.VIEW_MODE_SHOW_HIST);
+        mShowCumuHistMenuItem = menu.findItem(CameraListener.VIEW_MODE_SHOW_CUMUHIST);
 
         return true;
     }
@@ -179,15 +188,31 @@ public class MainActivity extends AppCompatActivity {
             case HISTOGRAM_GROUP_ID:
                 switch (id) {
                     case CameraListener.VIEW_MODE_SHOW_HIST:
-                        //Toggle button to show/hide histogram
                         item.setChecked(!item.isChecked());
-                        mCameraListener.setShowCumulativeHistogram(false);
+                        if (item.isChecked()) {
+                            mCameraListener.setViewMode(CameraListener.VIEW_MODE_SHOW_HIST);
+                            if (mShowCumuHistMenuItem != null) {
+                                mShowCumuHistMenuItem.setChecked(false);
+                                mCameraListener.setShowCumulativeHistogram(false);
+                                mCameraListener.setShowHistogram(item.isChecked());
+                            }
+                        } else {
+                            mCameraListener.setViewMode(CameraListener.VIEW_MODE_DEFAULT);
+                        }
+
                         mCameraListener.setShowHistogram(item.isChecked());
                         break;
                     case CameraListener.VIEW_MODE_SHOW_CUMUHIST:
-                        //Toggle button to show/hide histogram
                         item.setChecked(!item.isChecked());
-                        mCameraListener.setShowHistogram(false);
+                        if (item.isChecked()) {
+                            mCameraListener.setViewMode(CameraListener.VIEW_MODE_SHOW_CUMUHIST);
+                            if (mShowHistMenuItem != null) {
+                                mShowHistMenuItem.setChecked(false);
+                                mCameraListener.setShowHistogram(false);
+                            }
+                        } else {
+                            mCameraListener.setViewMode(CameraListener.VIEW_MODE_DEFAULT);
+                        }
                         mCameraListener.setShowCumulativeHistogram(item.isChecked());
                         break;
                 }
