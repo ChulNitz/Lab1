@@ -11,6 +11,8 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
     static final int VIEW_MODE_SHOW_HIST            = 3;
     static final int VIEW_MODE_SHOW_CUMUHIST        = 4;
 
+    static final int VIEW_MODE_HIST_EQUALIZE        = 5;
+
 
 
     //Mode selectors:
@@ -18,6 +20,8 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
     private int mColorMode = VIEW_MODE_RGBA   ;
     private boolean mShowHistogram = false;
     private boolean mShowCumulativeHistogram = false;
+
+    private boolean mShowEqualizedHistogram = false;
 
     //Members
     private Mat mImToProcess;
@@ -55,8 +59,16 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
     boolean isShowCumulativeHistogram() {
         return mShowCumulativeHistogram;
     }
+
+    boolean isShowEqualizedHistogram() {
+        return mShowEqualizedHistogram;
+    }
     public void setShowCumulativeHistogram(boolean showCumulativeHistogram) {
         mShowCumulativeHistogram = showCumulativeHistogram;
+    }
+
+    public void setShowEqualizedHistogram(boolean showEqualizedHistogram) {
+        mShowEqualizedHistogram = showEqualizedHistogram;
     }
 
     @Override
@@ -86,11 +98,15 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
             case VIEW_MODE_GRAYSCALE:
                 mImToProcess = inputFrame.gray();
                 break;
+
         }
 
         switch (mViewMode) {
             case VIEW_MODE_DEFAULT:
                 break;
+        }
+        if (mShowEqualizedHistogram) {
+            MyImageProc.equalizeHist(mImToProcess);
         }
         if (mShowHistogram) {
             int histSizeNum = 100;

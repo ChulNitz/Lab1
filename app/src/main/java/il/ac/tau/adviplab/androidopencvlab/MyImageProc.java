@@ -8,7 +8,9 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @SuppressWarnings("SameParameterValue")
 class MyImageProc extends CameraListener {
@@ -91,6 +93,27 @@ class MyImageProc extends CameraListener {
             calcCumulativeHist(hist[chIdx], cumuHist[chIdx]);
         }
     }
+
+    static void equalizeHist(Mat image) {
+        int numberOfChannels = image.channels();
+        if (numberOfChannels > 1) {
+            List<Mat> RGBAChannels = new ArrayList<>(numberOfChannels);
+            Core.split(image, RGBAChannels);
+            // Equalize the channels R,G,B,
+            // Don’t equalize the channel A
+            int i = 0;
+            for (Mat colorChannel : RGBAChannels) {
+                if (i != 3) {
+                    Imgproc.equalizeHist(colorChannel, colorChannel);
+                    i++;
+                } }
+            Core.merge(RGBAChannels, image);
+            for (Mat colorChannel : RGBAChannels) {
+                colorChannel.release();
+            }
+        } else {
+            Imgproc.equalizeHist(image, image);
+        } }
 
 }
 

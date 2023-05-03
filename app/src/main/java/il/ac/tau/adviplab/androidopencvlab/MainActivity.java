@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MenuItem mShowCumuHistMenuItem;
 
+    private MenuItem mShowEqualizedHistMenuItem;
+
 
     // menu IDs
     private static final int RESOLUTION_GROUP_ID     = 1;
@@ -137,11 +139,16 @@ public class MainActivity extends AppCompatActivity {
                 CameraListener.VIEW_MODE_SHOW_CUMUHIST, Menu.NONE, "Show cumulative histogram")
                 .setCheckable(true)
                 .setChecked(mCameraListener.isShowCumulativeHistogram());
+        histogramMenu.add(HISTOGRAM_GROUP_ID,
+                CameraListener.VIEW_MODE_HIST_EQUALIZE, Menu.NONE, "Equalize")
+                .setCheckable(true)
+                .setChecked(mCameraListener.isShowCumulativeHistogram());
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
         // Store the menu items for histogram and cumulative histogram
         mShowHistMenuItem = menu.findItem(CameraListener.VIEW_MODE_SHOW_HIST);
         mShowCumuHistMenuItem = menu.findItem(CameraListener.VIEW_MODE_SHOW_CUMUHIST);
-
+        mShowEqualizedHistMenuItem = menu.findItem(CameraListener.VIEW_MODE_HIST_EQUALIZE);
         return true;
     }
 
@@ -214,6 +221,11 @@ public class MainActivity extends AppCompatActivity {
                             mCameraListener.setViewMode(CameraListener.VIEW_MODE_DEFAULT);
                         }
                         mCameraListener.setShowCumulativeHistogram(item.isChecked());
+                        break;
+                    case CameraListener.VIEW_MODE_HIST_EQUALIZE:
+                        item.setChecked(!item.isChecked());
+                        mCameraListener.setViewMode(CameraListener.VIEW_MODE_HIST_EQUALIZE);
+                        mCameraListener.setShowEqualizedHistogram(item.isChecked());
                         break;
                 }
                 return true;
