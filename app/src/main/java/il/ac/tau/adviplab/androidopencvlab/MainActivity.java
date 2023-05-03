@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         histogramMenu.add(HISTOGRAM_GROUP_ID,
                 CameraListener.VIEW_MODE_SHOW_CUMUHIST, Menu.NONE, "Show cumulative histogram")
                 .setCheckable(true)
-                .setChecked(mCameraListener.isShowCumuHistogram());
+                .setChecked(mCameraListener.isShowCumulativeHistogram());
 
         return true;
     }
@@ -181,16 +181,17 @@ public class MainActivity extends AppCompatActivity {
                     case CameraListener.VIEW_MODE_SHOW_HIST:
                         //Toggle button to show/hide histogram
                         item.setChecked(!item.isChecked());
-                        mCameraListener.setShowCumuHistogram(false);
+                        mCameraListener.setShowCumulativeHistogram(false);
                         mCameraListener.setShowHistogram(item.isChecked());
                         break;
                     case CameraListener.VIEW_MODE_SHOW_CUMUHIST:
                         //Toggle button to show/hide histogram
                         item.setChecked(!item.isChecked());
                         mCameraListener.setShowHistogram(false);
-                        mCameraListener.setShowCumuHistogram(item.isChecked());
+                        mCameraListener.setShowCumulativeHistogram(item.isChecked());
                         break;
                 }
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);

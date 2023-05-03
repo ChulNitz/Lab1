@@ -39,8 +39,8 @@ class MyImageProc extends CameraListener {
         mat0.release();
         histSize.release();
         ranges.release();
-
     }
+
     static void calcHist(Mat image, Mat[] histList, int histSizeNum) {
         calcHist( image, histList, histSizeNum, 1, Core.NORM_L1);
     }

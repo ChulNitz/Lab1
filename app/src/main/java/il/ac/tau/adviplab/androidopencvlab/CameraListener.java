@@ -17,7 +17,7 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
     private int mViewMode  = VIEW_MODE_DEFAULT;
     private int mColorMode = VIEW_MODE_RGBA   ;
     private boolean mShowHistogram = false;
-    private boolean mShowCumuHistogram = false;
+    private boolean mShowCumulativeHistogram = false;
 
     //Members
     private Mat mImToProcess;
@@ -52,11 +52,11 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
         mShowHistogram = showHistogram;
     }
 
-    boolean isShowCumuHistogram() {
-        return mShowCumuHistogram;
+    boolean isShowCumulativeHistogram() {
+        return mShowCumulativeHistogram;
     }
-    public void setShowCumuHistogram(boolean showCumuHistogram) {
-        mShowCumuHistogram = showCumuHistogram;
+    public void setShowCumulativeHistogram(boolean showCumulativeHistogram) {
+        mShowCumulativeHistogram = showCumulativeHistogram;
     }
 
     @Override
@@ -97,7 +97,7 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
             MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
             MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
         }
-        if (mShowCumuHistogram) {
+        if (mShowCumulativeHistogram) {
             int histSizeNum = 100;
             int numberOfChannels = Math.min(mImToProcess.channels(),3);
             MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
