@@ -80,6 +80,12 @@ class MyImageProc extends CameraListener {
         showHist(image, histList, histSizeNum, offset, thickness);
     }
 
+    static void ShowMatchedHist(Mat image, Mat[] histList, int histSizeNum) {
+        int thickness = Math.min(image.width() / (100 + 10) / 5, 5);
+        int offset =  (image.width() - (100 + 4 * 10) * thickness);
+        showHist(image, histList, histSizeNum, offset, thickness);
+    }
+
     private static void matchHistogram(Mat histSrc, Mat histDst, Mat
             lookUpTable) {
     //  In MyImageProc.java create a function matchHistogram that accepts a source histogram and a destination histogram

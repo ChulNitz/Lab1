@@ -188,12 +188,6 @@ public class MainActivity extends AppCompatActivity {
         switch (groupId) {
             case DEFAULT_GROUP_ID:
                 mCameraListener.setViewMode(id);
-                // Reset all histogram menu items
-                mShowHistMenuItem.setChecked(false);
-                mShowCumuHistMenuItem.setChecked(false);
-                mShowEqualizedHistMenuItem.setChecked(false);
-                mShowMatchedHistMenuItem.setChecked(false);
-
                 return true;
 
             case COLOR_GROUP_ID:
@@ -217,112 +211,41 @@ public class MainActivity extends AppCompatActivity {
             case HISTOGRAM_GROUP_ID:
                 switch (id) {
                     case CameraListener.VIEW_MODE_SHOW_HIST:
+                        //Toggle button to show/hide histogram
+                        mShowCumuHistMenuItem.setChecked(false);
                         item.setChecked(!item.isChecked());
-                        if (item.isChecked()) {
-                            mCameraListener.setViewMode(id);
-                            if (mShowCumuHistMenuItem != null) {
-                                mShowCumuHistMenuItem.setChecked(false);
-                                mCameraListener.setShowCumulativeHistogram(false);
-                                mCameraListener.setShowHistogram(item.isChecked());
-                            }
-                            // if we are in matched mode, and show histogram is checked, we need to display both
-                            if (mCameraListener.isShowMatchedHistogram()) {
-                                // if the image is not grayscale: show a toast and return
-                                if (mCameraListener.getColorMode() != CameraListener.VIEW_MODE_GRAYSCALE) {
-                                    Toast.makeText(this, "This feature currently works only in grayscale mode",
-                                            Toast.LENGTH_SHORT).show();
-                                    return true;
-                                }
-                                //Open gallery to select image for matching
-                                Intent intent = new Intent();
-                                intent.setType("image/*");
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                startActivityForResult(Intent.createChooser(intent,
-                                                "Select image for histogram matching"),
-                                        SELECT_PICTURE);
-                                mCameraListener.setViewMode(CameraListener.VIEW_MODE_HIST_MATCH);
-                                mCameraListener.setShowMatchedHistogram(true);
-                            }
-                        } else {
-                            mCameraListener.setViewMode(CameraListener.VIEW_MODE_DEFAULT);
-                        }
-
                         mCameraListener.setShowHistogram(item.isChecked());
+                        mCameraListener.setShowCumulativeHistogram(false);
                         break;
-                    case CameraListener.VIEW_MODE_SHOW_CUMUHIST:
-                        item.setChecked(!item.isChecked());
-                        if (item.isChecked()) {
-                            mCameraListener.setViewMode(id);
-                            if (mShowHistMenuItem != null) {
-                                mShowHistMenuItem.setChecked(false);
-                                mCameraListener.setShowHistogram(false);
-                            }
-                            // if we are in matched mode, and show cumulative histogram is checked,
-                            // we need to display both
-                            // if we are in matched mode, and show histogram is checked, we need to display both
-                            if (mCameraListener.isShowMatchedHistogram()) {
-                                // if the image is not grayscale: show a toast and return
-                                if (mCameraListener.getColorMode() != CameraListener.VIEW_MODE_GRAYSCALE) {
-                                    Toast.makeText(this, "This feature currently works only in grayscale mode",
-                                            Toast.LENGTH_SHORT).show();
-                                    return true;
-                                }
-                                //Open gallery to select image for matching
-                                Intent intent = new Intent();
-                                intent.setType("image/*");
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                startActivityForResult(Intent.createChooser(intent,
-                                                "Select image for histogram matching"),
-                                        SELECT_PICTURE);
-                                mCameraListener.setViewMode(CameraListener.VIEW_MODE_HIST_MATCH);
-                                mCameraListener.setShowMatchedHistogram(true);
-                            } else {
-                                mCameraListener.setViewMode(CameraListener.VIEW_MODE_DEFAULT);
-                            }
-                        }
-                        mCameraListener.setShowCumulativeHistogram(item.isChecked());
-                        break;
-                    case CameraListener.VIEW_MODE_HIST_EQUALIZE:
-                        item.setChecked(!item.isChecked());
-                        mCameraListener.setViewMode(CameraListener.VIEW_MODE_HIST_EQUALIZE);
-                        mCameraListener.setShowEqualizedHistogram(item.isChecked());
 
-                        // keep regular histogram and cumulative histogram shown if checked
-                        if (mShowHistMenuItem != null && mShowHistMenuItem.isChecked()) {
-                            mCameraListener.setShowHistogram(true);
-                        }
-                        if (mShowCumuHistMenuItem != null && mShowCumuHistMenuItem.isChecked()) {
-                            mCameraListener.setShowCumulativeHistogram(item.isChecked());
-                        }
+                    case CameraListener.VIEW_MODE_SHOW_CUMUHIST:
+                        //Toggle button to show/hide histogram
+                        mShowHistMenuItem.setChecked(false);
+                        item.setChecked(!item.isChecked());
+                        mCameraListener.setShowCumulativeHistogram(item.isChecked());
+                        mCameraListener.setShowHistogram(false);
+                        break;
+
+                    case CameraListener.VIEW_MODE_HIST_EQUALIZE:
+                        mCameraListener.setViewMode(id);
                         break;
                     case CameraListener.VIEW_MODE_HIST_MATCH:
-                        item.setChecked(!item.isChecked());
-                         if (item.isChecked()) {
-                            // if the image is not grayscale: show a toast and return
-                            if (mCameraListener.getColorMode() != CameraListener.VIEW_MODE_GRAYSCALE) {
-                                Toast.makeText(this, "This feature currently works only in grayscale mode",
-                                        Toast.LENGTH_SHORT).show();
-                                return true;
-                            }
-                            // keep regular histogram and cumulative histogram shown if checked
-                            if (mShowHistMenuItem != null && mShowHistMenuItem.isChecked()) {
-                                mCameraListener.setShowHistogram(true);
-                            }
-                            if (mShowCumuHistMenuItem != null && mShowCumuHistMenuItem.isChecked()) {
-                                mCameraListener.setShowCumulativeHistogram(true);
-                            }
-                            //Open gallery to select image for matching
-                            Intent intent = new Intent();
-                            intent.setType("image/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent,
-                                            "Select image for histogram matching"),
-                                    SELECT_PICTURE);
-                            mCameraListener.setViewMode(id);
+                        //Open gallery to select image for matching
+                        if (mCameraListener.getColorMode() != CameraListener.VIEW_MODE_GRAYSCALE) {
+                            Toast.makeText(MainActivity.this, "This feature currently works only in grayscale mode",
+                                    Toast.LENGTH_SHORT).show();
                             break;
-                        } else {
-                            mCameraListener.setViewMode(CameraListener.VIEW_MODE_DEFAULT);
-                         }
+                        }
+                        Intent intent = new Intent();
+                        intent.setType("image/*");
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        startActivityForResult(Intent.createChooser(intent,
+                                "Select image for histogram matching"),
+                                SELECT_PICTURE);
+                        mCameraListener.setViewMode(id);
+                        break;
+
+
                 }
                 return true;
 

@@ -133,81 +133,38 @@ class CameraListener implements CameraBridgeViewBase.CvCameraViewListener2 {
 //  when we are in matched mode we wish to show the match target histogram, and also diaplay histogram/cumulative if selected
         int histSizeNum = 100;
         int numberOfChannels = Math.min(mImToProcess.channels(), 3);
+        Mat[] MatchedHist = new Mat[0];
         switch (mViewMode) {
             case VIEW_MODE_DEFAULT:
-                mShowEqualizedHistogram = false;
-                mShowMatchedHistogram = false;
-                mShowHistogram = false;
-                mShowCumulativeHistogram = false;
-                return mImToProcess;
-            case VIEW_MODE_SHOW_HIST:
-                if (mShowEqualizedHistogram) {
-                    MyImageProc.equalizeHist(mImToProcess);
-                }
-                MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-                MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
-                // keep matched histogram if selected
-                if (mShowMatchedHistogram) {
-                    if (mHistDstArray == null) {
-                        break;
-                    }
-                    if (mHistDstArray[0].total() > 0) {
-                        MyImageProc.matchHist(mImToProcess, mImageToMatch,
-                                mHistArray, mHistDstArray, true);
-                    }
-                }
                 break;
-            case VIEW_MODE_SHOW_CUMUHIST:
-                if (mShowEqualizedHistogram) {
-                    MyImageProc.equalizeHist(mImToProcess);
-                }
-                MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-                MyImageProc.calcCumulativeHist(mHistArray, mCumuHistArray, numberOfChannels);
-                MyImageProc.showHist(mImToProcess, mCumuHistArray, histSizeNum);
-                if (mShowMatchedHistogram) {
-                    if (mHistDstArray == null) {
-                        break;
-                    }
-                    if (mHistDstArray[0].total() > 0) {
-                        MyImageProc.matchHist(mImToProcess, mImageToMatch,
-                                mHistArray, mHistDstArray, true);
-                    }
-                }
+
             case VIEW_MODE_HIST_EQUALIZE:
-                  // equalize the image and show the histogram/ cumulative histogram if selected
-                if (mShowEqualizedHistogram) {
-                    MyImageProc.equalizeHist(mImToProcess);
-                }
-                if (mShowHistogram) {
-                    MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-                    MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
-                }
-                if (mShowCumulativeHistogram) {
-                    MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-                    MyImageProc.calcCumulativeHist(mHistArray, mCumuHistArray, numberOfChannels);
-                    MyImageProc.showHist(mImToProcess, mCumuHistArray, histSizeNum);
-                }
+                MyImageProc.equalizeHist(mImToProcess);
                 break;
+
             case VIEW_MODE_HIST_MATCH:
                 if (mHistDstArray == null) {
                     break;
                 }
-                if (mHistDstArray[0].total() > 0) {
+                if (mHistDstArray[0].total() > 0) { //This handles the case that an image hasn’t been chosen
+                    MyImageProc.calcHist(mImToProcess, mHistArray, 256);
                     MyImageProc.matchHist(mImToProcess, mImageToMatch,
                             mHistArray, mHistDstArray, true);
                 }
-                if (mShowHistogram) {
-                    MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-                    MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
-                }
-                if (mShowCumulativeHistogram) {
-                    MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
-                    MyImageProc.calcCumulativeHist(mHistArray, mCumuHistArray, numberOfChannels);
-                    MyImageProc.showHist(mImToProcess, mCumuHistArray, histSizeNum);
-                }
-
                 break;
+
         }
+
+        if (mShowHistogram) {
+            MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
+            MyImageProc.showHist(mImToProcess, mHistArray, histSizeNum);
+        }
+        if (mShowCumulativeHistogram) {
+            MyImageProc.calcHist(mImToProcess, mHistArray, histSizeNum);
+            MyImageProc.calcCumulativeHist(mHistArray, mCumuHistArray, Math.min(mImToProcess.channels(), 3));
+            MyImageProc.showHist(mImToProcess, mCumuHistArray, histSizeNum);
+        }
+
         return mImToProcess;
     }
 
