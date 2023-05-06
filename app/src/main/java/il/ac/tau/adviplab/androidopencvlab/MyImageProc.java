@@ -124,8 +124,8 @@ class MyImageProc extends CameraListener {
 
 //        compute histogram of current input image with 256 bins
         calcHist(srcImage, srcHistArray, 256);
-        Point point_1 = new Point(2,10);
-        Point point_2 = new Point(2,15);
+        Point point_1 = new Point(2,15);
+        Point point_2 = new Point(2,30);
         compareHistograms(srcImage, srcHistArray[0], dstHistArray[0], point_1, COMP_MATCH_DISTANCE, "Distance Before Matching");
 //        find mapping from input image to destination image
         matchHistogram(srcHistArray[0], dstHistArray[0], lookupTable);
@@ -136,7 +136,7 @@ class MyImageProc extends CameraListener {
         // calculate the new histogram of the image and save in a new variable
 //        Mat[] newHistArray = new Mat[1];
         calcHist(srcImage, srcHistArray, 256);
-        compareHistograms(srcImage, srcHistArray[0], dstHistArray[0], point_2, COMP_MATCH_DISTANCE, "Match Distance after matching");
+        compareHistograms(srcImage, srcHistArray[0], dstHistArray[0], point_2, COMP_MATCH_DISTANCE, "Distance after matching");
         //Here add the part that displays the histogram if histShow == true
         //If (histShow == true), then display a 100-bin histogram of the destination image at the right side of the screen.
         if (histShow) {
@@ -144,7 +144,6 @@ class MyImageProc extends CameraListener {
             int offset =  (srcImage.width() - (100 + 4 * 10) * thickness);
             calcHist(dstImage, srcHistArray, 100);
             showHist(srcImage, srcHistArray, 100, offset, thickness);
-
         }
         // release newHistArray
 //        newHistArray[0].release();
